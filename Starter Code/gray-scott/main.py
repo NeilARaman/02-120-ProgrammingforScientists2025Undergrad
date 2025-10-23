@@ -46,19 +46,19 @@ def main():
     # make prey = 1 everywhere
     for i in range(len(initial_board)):
         for j in range(len(initial_board[i])):
-            initial_board[r][c] = (1, initial_board[r][c][1])
+            initial_board[i][j] = (1, initial_board[i][j][1])
 
     # parameters
     num_gens = 8000
-    feed_rate = 0.034
-    kill_rate = 0.095
+    feed_rate = 0.042
+    kill_rate = 0.101
 
     # kernel for diffusion
-    kernel = np.array([
+    kernel = [
         [0.05, 0.2, 0.05],
         [0.2, -1.0, 0.2],
         [0.05, 0.2, 0.05],
-    ])
+    ]
 
     print("Starting simulation...")
     boards = simulate_gray_scott(
