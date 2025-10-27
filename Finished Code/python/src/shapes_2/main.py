@@ -3,6 +3,12 @@
 
 # place class declarations between imports and def main
 
+# I am tired of writing init and repr so let's let Python do it!
+from dataclasses import dataclass
+
+import copy
+
+@dataclass
 class Rectangle:
     """
     Represents a 2D rectangle with width, height, position, and rotation
@@ -23,22 +29,14 @@ class Rectangle:
     # Every class declaration should have a constructor to set fields
     # Also, Python calls fields "attributes"
     # We will allow the user to set attributes of an instance the second it is born
-    def __init__(self, width: float=0.0, height: float=0.0, x1: float=0.0, y1: float=0.0, rotation: float=0.0):
-        # let's protect the program from a bad user 
-        if width < 0.0 or height < 0.0:
-            raise ValueError("width and height must be nonnegative.")
-        # we could add tests for if variables are all floats, etc.
-        
-        # what attributes should every Rectangle get?
-        self.width = width
-        self.height = height
-        self.x1 = x1
-        self.y1 = y1
-        self.rotation = rotation
 
-    def __repr__(self) -> str:
-        # let's have a nice f string to print the attributes 
-        return f"Rectangle(width={self.width},height={self.height},x1={self.x1}, y1={self.y1}, rotation={self.rotation})"
+    # with dataclass, we can define our attributes closer to language-neutral way
+    width: float = 1.0 
+    height: float = 1.0
+    rotation: float = 0.0
+    x1: float = 0.0 
+    y1: float = 0.0
+
     
     def area(self) -> float:
         """Method to return the area of rectangle."""
@@ -54,7 +52,7 @@ class Rectangle:
         self.width *= f
         self.height *= f
 
-
+@dataclass
 class Circle:
     """
     Represents a 2D circle via its center and radius.
@@ -70,16 +68,9 @@ class Circle:
 
     description: str = "round"
 
-    def __init__(self, x1: float=0, y1: float = 0, radius: float = 0):
-        if radius < 0.0:
-            raise ValueError("width and height must be nonnegative.")
-        self.x1 = x1
-        self.y1 = y1
-        self.radius = radius
-
-    def __repr__(self) -> str:
-        # let's have a nice f string to print the attributes 
-        return f"Circle(x1={self.x1}, y1={self.y1}, radius={self.radius})"
+    radius: float = 1.0
+    x1: float = 0.0
+    y1: float = 0.0
     
     def area(self) -> float:
         """Method to compute area of circle."""
@@ -93,6 +84,51 @@ class Circle:
     def scale(self, f: float):
         """Dilate the shape by a factor of f."""
         self.radius *= f    
+
+@dataclass
+class Node:
+    """doc string missing."""
+    name: str = ""
+    age: float = 0.0
+
+
+@dataclass
+class Tree:
+    """doc string"""
+    nodes: list[Node] = None
+    label: str = ""
+
+
+def tree_trouble():
+    t = Tree(nodes=[Node("A", 1), Node("B", 2)], label="This is t.")
+    print("Original t:", t)
+
+    # if we really wanted to just make a copy of t, we have a built-in module to help us!
+
+    s = copy.deepcopy(t) # any time you want to copy an object, use this
+
+    """This is sus.
+    # create an empty tree and manually copy over attributes 
+    s = Tree() # definitely a new tree
+
+    s.label = t.label # fine
+    s.nodes = t.nodes # not OK 
+
+
+    # never assign one mutable thing to be equal to another unless we know what we're doing
+
+    # s.nodes is mutable, so what happened?
+    # s.nodes and t.nodes REFER to the same memory address
+    """
+
+    # change s
+    s.label = "This is s." # this only changes s.label
+    s.nodes[0].name = "Fred" #this changes t.nodes since they have the same reference
+
+    # after modification ....
+    print("s:", s)
+    print("t:", t)
+
 
 # Mutable things are pass by reference
 # Lists
@@ -113,15 +149,45 @@ def main():
 
     # list_stuff()
 
-    # when you make a variable, python gives it a numeric ID (like an Andrew ID)
+    # when you make a variable, python gives it a numeric ID (like an Andrew ID) associated with its memory address
     # we access it with the id() function
 
-    n = 5 
-    print("Outside function before change:", n, id(n))
+    #copy_and_memory_stuff()
 
-    change_value(n)
+    # tree_trouble()
 
-    print("Outside function after change:", n, id(n))
+    weirdest_thing_in_python_ever()
+
+def weirdest_thing_in_python_ever():
+    x = 42 # change to a number outside range [-5, 255] and we get different behavior
+    y = x 
+    z = 42 # change to equal x
+
+    if id(x) == id(z):
+        print("x and z have same address?")
+
+    if id(x) == id(y):
+        print("Same reference in memory.")
+
+    y += 10 # y is immutable so it changes now
+
+    if id(x) == id(y):
+        print("Still the same?")
+
+    y -= 10 # now it has the same value as x. but it can't have the same address? But it does!
+
+    if id(x) == id(y):
+        print("They can't be the same. RIGHT?")
+
+
+
+def copy_and_memory_stuff():
+    msg = "Hi"
+    print("Outside function before change:", msg, id(msg))
+
+    change_value(msg)
+
+    print("Outside function after change:", msg, id(msg))
 
     # id() is useful because if we have two objects we can check if they are actually the same literal object
 
@@ -153,22 +219,26 @@ def main():
 
     r3 = Rectangle(width = r1.width, height = r1.height, x1 = r1.x1, y1 = r1.y1, rotation = r1.rotation)
 
+    # this only works because the attributres of rectangle are immutable. It's not the best approach
+
+    r3.translate(-5, -7)
+    print("After translating the manual copy")
+    print("r1:", r1)
+    print("r3:", r3)
 
 
-
-
-
-
-def change_value(x:int) -> None:
-    print("Inside function before change:", x, id(x))
+def change_value(greeting:str) -> None:
+    print("Inside function before change:", greeting, id(greeting))
 
     # presumably, the id(x) should not be id(n). A copy got created because it's pass by value. Right?
 
     # but it's not. When you pass even an integer into the function, you are passing the literal integer in by (object) reference
 
-    x += 10 # when this happens, a new variable with name x gets created
+    # immutable things are pass by reference BUT as soon as they take a new value (the point of functions) they get a new address
 
-    print("Inside function after change:", x, id(x))
+    greeting = "yo" # when this happens, a new variable with name x gets created
+
+    print("Inside function after change:", greeting, id(greeting))
 
 
 def list_stuff():
