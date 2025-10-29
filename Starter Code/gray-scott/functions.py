@@ -1,4 +1,4 @@
-from datatypes import Board
+from datatypes import Board, Cell
 
 
 def initialize_board(num_rows: int, num_cols: int) -> Board:
@@ -21,7 +21,7 @@ def initialize_board(num_rows: int, num_cols: int) -> Board:
     return board
 
 
-def sum_cells(*cells: tuple[float, float]) -> tuple[float, float]:
+def sum_cells(*cells: Cell) -> Cell:
     """
     Sum an arbitrary number of Cell variables element-wise.
 
