@@ -72,7 +72,7 @@ class Node:
                 return self.right_child.search_recursive(key)
             return None
 
-    def insert_recursive(self, key: int, prev_node: Node) -> Node | None:
+    def insert_recursive(self, key: int) -> Node | None:
         """
         Recursively insert a key into a binary search tree (BST).
 
