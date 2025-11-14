@@ -58,6 +58,37 @@ class Node:
         if self.child2 is not None:
             leaves += self.child2.count_leaves()
         return leaves
+    
+    def to_newick_ages(self) -> str:
+        """
+        Recursively serialize this subtree to Newick with branch lengths,
+        where each branch length = parent.age - child.age.
+
+        Returns:
+            Newick string for this subtree (no trailing semicolon).
+        """
+        # Base case: leaf node
+        if self.is_leaf():
+            return self.label if self.label else f"N{self.num}"
+
+        parts: list[str] = []
+
+        # Process child1 if it exists
+        if self.child1 is not None:
+            bl1 = max(self.age - self.child1.age, 0.0)
+            part1 = f"{self.child1.to_newick_ages()}:{bl1:.6f}"
+            parts.append(part1)
+
+        # Process child2 if it exists
+        if self.child2 is not None:
+            bl2 = max(self.age - self.child2.age, 0.0)
+            part2 = f"{self.child2.to_newick_ages()}:{bl2:.6f}"
+            parts.append(part2)
+
+        inside = ",".join(parts)
+
+        # Internal node: include label if present
+        return f"({inside}){self.label}" if self.label else f"({inside})"
 
 # alias declarations 
 

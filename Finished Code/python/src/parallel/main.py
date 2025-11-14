@@ -12,7 +12,32 @@ def main():
 
     # sum_example_two_procs()
 
-    sum_example_multiple_procs()
+    # sum_example_multiple_procs()
+
+    timing_comparison_serial_vs_multi_procs(100000000)
+
+def timing_comparison_serial_vs_multi_procs(n:int):
+    data = list(range(1, n+1))
+    num_procs = multiprocessing.cpu_count()
+
+    # time the parallel approach
+    start_parallel = time.time()
+    sum_multi_procs(data, num_procs)
+    end_parallel =time.time()
+    total_parallel = end_parallel - start_parallel
+    print(f"Sum of first {n} integers using {num_procs} processes is: {total_parallel}")
+
+    # time the serial approach
+    start_serial = time.time()
+    sum_serial(data)
+    # sum_multi_procs(data, 1) # a serial algorithm in disguise as a parallel one
+    end_serial =time.time()
+    total_serial = end_serial - start_serial
+    print(f"Sum of first {n} integers using serial computing is: {total_serial}")
+
+    print(f"Speedup provided by parallel approach: {total_serial/total_parallel}")    
+
+
 
 def sum_example_multiple_procs():
     # we would rather split a problem into a number of pieces that is equal to the number of processors available 
@@ -90,6 +115,16 @@ def sum_multi_procs(data: list[int], num_procs:int) -> int:
 
     return total_sum
 
+def sum_serial(data: list[int]) -> int:
+    """
+    Hopefully an easy function.
+    """
+    s = 0
+
+    for element in data:
+        s += element
+
+    return s
 
 def sum_example_two_procs():
     # we're going back to our Gauss example of summing first n integers 

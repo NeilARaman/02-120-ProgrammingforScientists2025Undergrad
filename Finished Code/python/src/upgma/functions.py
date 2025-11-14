@@ -261,7 +261,7 @@ def initialize_clusters(t: Tree) -> list[Node]:
         list[Node]: The first n nodes of `t`, corresponding to the leaves.
     """
 
-    num_leaves = (len(t) + 1)/2
+    num_leaves = (len(t) + 1)//2
     
     clusters: list[Node] = []
 

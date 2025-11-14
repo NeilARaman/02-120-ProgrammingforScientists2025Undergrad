@@ -28,7 +28,6 @@ def to_newick(tree: Tree) -> str:
     """
     return f"({tree[-1].to_newick_ages()});"
 
-
 def read_matrix_from_file(filename: str) -> tuple[list[str], DistanceMatrix]:
     """
     Read a distance matrix and corresponding species names from a CSV file.
