@@ -2,28 +2,87 @@ import math
 from datatypes import OrderedPair, Universe, QuadTree, Node, Quadrant, Star, distance, compute_force, center_of_gravity
 from copy import deepcopy
 
-
 def barnes_hut(
     initial_universe: Universe,
     num_gens: int,
     time: float,
     theta: float
-) -> list[Universe]:
-    # TODO: implement
-    pass
+    ) -> list[Universe]:
+    """
+    Run the Barnes-Hut simulation for num_gens generations.
+    
+    Parameters:
+        initial_universe: The starting state of the universe
+        num_gens: Number of generations to simulate
+        time: Time interval for each update step
+        theta: Barnes-Hut approximation parameter
+    
+    Returns:
+        A list of (num_gens + 1) Universe objects, where index i 
+        represents the state after i time steps
+    """
+    # Initialize list with the initial universe
+    time_points = [initial_universe]
+    # Run the simulation for num_gens generations
+    for i in range(num_gens):
+        # Update from the most recent universe
+        next_universe = update_universe(time_points[i], time, theta)
+        time_points.append(next_universe)
+    return time_points
 
-
-def update_universe(
-    current_universe: Universe,
-    time: float,
-    theta: float
-) -> Universe:
-    # TODO: implement
-    pass
+def update_universe(current_universe: Universe, time: float, theta: float) -> Universe:
+    """
+    Update the universe by one time step using Barnes-Hut.
+    
+    Parameters:
+        current_universe: The current state of the universe
+        time: The time interval for this update step
+        theta: The Barnes-Hut approximation parameter
+    
+    Returns:
+        A new Universe object with updated star positions and velocities
+    """
+    # Create a copy to avoid modifying the original
+    new_universe = copy_universe(current_universe)
+    # Generate the quadtree
+    tree = generate_quadtree(new_universe)
+    # Update each star
+    for i, star in enumerate(new_universe.stars):
+        # Store old values
+        old_acceleration = current_universe.stars[i].acceleration
+        old_velocity = current_universe.stars[i].velocity
+        # Calculate new acceleration using the quadtree
+        star.acceleration = update_acceleration(star, tree, theta)
+        # Update velocity using old acceleration
+        star.velocity = update_velocity(star, time, old_acceleration)
+        # Update position using old acceleration and old velocity
+        star.position = update_position(star, time, old_acceleration, old_velocity)
+    return new_universe
 
 def generate_quadtree(universe: Universe) -> QuadTree:
-    # TODO: implement
-    pass
+    """
+    Build a quadtree over the universe's stars, using the root sector.
+    
+    Parameters:
+        universe: The Universe containing stars to organize
+    
+    Returns:
+        QuadTree with all in-bounds stars properly inserted
+    """
+    # Define variables with root node
+    root_sector = Quadrant(x=0.0, y=0.0, width=universe.width)
+    root_node = Node(sector=root_sector)
+    tree = QuadTree(root=root_node)
+    # Insert all valid stars
+    if universe.stars is not None:
+        for star in universe.stars:
+            # Skip stars without positions
+            if star.position is None:
+                continue
+            # Only insert stars within universe bounds
+            if universe.in_field(star.position):
+                tree.insert(star)
+    return tree
 
 G = 6.67408e-11  # gravitational constant (you can scale this for visualization)
 

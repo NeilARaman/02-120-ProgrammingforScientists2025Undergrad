@@ -1,7 +1,5 @@
 import pygame
 from datatypes import Universe
-from engine import barnes_hut_stream
-
 
 def animate_system(
     time_points: list[Universe],
