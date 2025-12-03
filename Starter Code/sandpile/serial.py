@@ -46,26 +46,113 @@ def create_board(r: int,
     return b
 
 def simulate_sandpiles(initial_board: Board) -> list[Board]:
-    #TODO: implement
-    pass
+    """
+    Run the sandpile simulation until convergence.
+    
+    Parameters:
+        initial_board: The starting configuration.
+    
+    Returns:
+        list[Board]: All boards from initial to final stable state.
+    """
+    # Define variables
+    final_boards = [deep_copy_board(initial_board)]
+    current_board = deep_copy_board(initial_board)
+    # Keep updating until stable
+    while not is_converged(current_board):
+        # Apply one update step
+        current_board = update(current_board)
+        # Add board to history
+        final_boards.append(deep_copy_board(current_board))
+    return final_boards
 
 
 def is_converged(b: Board) -> bool:
-    #TODO: implement
-    pass
+    """
+    Check whether the board has reached a stable configuration.
+    
+    Parameters:
+        b: The current sandpile board.
+    
+    Returns:
+        bool: True if no cell has 4 or more coins, False otherwise.
+    """
+    # Check every cell on the board
+    for row in b:
+        for cell in row:
+            # If any cell can still topple, not converged
+            if cell >= 4:
+                return False
+    # All cells are stable
+    return True
 
 
 def update(b: Board) -> Board:
-    #TODO: implement
-    pass
+    """
+    Perform one update step of the sandpile simulation.
+    
+    Parameters:
+        b: The current sandpile board.
+    
+    Returns:
+        Board: A new board after one update step.
+    """
+    # Define variables
+    rows = num_rows(b)
+    cols = num_cols(b)
+    new_board = []
+    # Update each cell
+    for r in range(rows):
+        new_row = []
+        for c in range(cols):
+            old_value = b[r][c]
+            coins_out = number_of_coins_out(b, r, c)
+            coins_in = number_of_coins_in(b, r, c)
+            new_value = old_value - coins_out + coins_in
+            new_row.append(new_value)
+        new_board.append(new_row)
+    return new_board
 
 
 def number_of_coins_out(b: Board, r: int, c: int) -> int:
-    #TODO: implement
-    pass
-
+    """
+    Return the number of coins that cell (r, c) sends to its neighbors.
+    
+    Parameters:
+        b: The current sandpile board.
+        r: Row index of the cell.
+        c: Column index of the cell.
+    
+    Returns:
+        int: Total number of coins sent out.
+    """
+    return (b[r][c] // 4) * 4
 
 def number_of_coins_in(b: Board, r: int, c: int) -> int:
-    #TODO: implement
-    pass
+    """
+    Return the number of coins that cell (r, c) receives from its neighbors.
+    
+    Parameters:
+        b: The current sandpile board.
+        r: Row index of the cell.
+        c: Column index of the cell.
+    
+    Returns:
+        int: Total number of coins received from all neighbors.
+    """
+    # Define variables
+    total_coins = 0
+    neighbors = [
+        (r - 1, c),  # North
+        (r + 1, c),  # South
+        (r, c - 1),  # West
+        (r, c + 1)   # East
+    ]
+    # Check each neighbor
+    for nr, nc in neighbors:
+        # Check if in bounds
+        if 0 <= nr < len(b) and 0 <= nc < len(b[0]):
+            # Add coins from this neighbor
+            total_coins += b[nr][nc] // 4
+    return total_coins
 
